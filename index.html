@@ -1,0 +1,120 @@
+<script src="//code.jquery.com/jquery-1.11.2.min.js"></script>
+<meta charset="UTF-8">
+
+<form id="frm1" method="post">
+  pw: <input type="password" name="pw" id="pw1">
+  <button type="button" onclick="go();" id="btn1">Go!</button>
+  <input type="checkbox" name="full" id="full1">全視窗
+</form>
+
+<form id="frm2" method="post">
+  update: <input type="text" name="update" id="update1">
+  <button type="button" onclick="mupdate();" id="btn2">Update!</button>
+</form>
+
+<script type="text/javascript">
+  var strUrl = location.search;
+  var getPara, ParaVal;
+  var aryPara = [];
+
+  if (strUrl.indexOf("?") != -1) {
+    var getSearch = strUrl.split("?");
+    getPara = getSearch[1].split("&");
+    for (i = 0; i < getPara.length; i++) {
+      ParaVal = getPara[i].split("=");
+      aryPara.push(ParaVal[0]);
+      aryPara[ParaVal[0]] = ParaVal[1];
+    }
+    if((pw=aryPara["pw"]) != null)
+    {
+        $('#pw1').val(pw);
+        $.ajax({
+            method:"POST",
+            url: "getUrl.php",
+            data: {pw: btoa(pw)},
+            dataType:'text',
+            success: function(msg){
+                if(msg != -1){
+                    url=msg;
+                    $('#update1').val(url);                
+                    window.location = url;
+                }else{
+                    alert('叭叭!密碼錯啦!');
+                    return;
+                }
+            },
+            error:function(xhr, ajaxOptions, thrownError){
+                alert(xhr.status);
+                alert(thrownError);
+            }
+        });
+    }
+  }
+</script>
+
+<script language="javascript" type="text/javascript">
+
+$("#pw1").keyup(function(event){
+    if(event.keyCode == 13){
+        go();
+    }
+});
+
+var win=null;
+function NewWindow(mypage,myname,w,h,scroll,pos){
+if(pos=="random"){LeftPosition=(screen.width)?Math.floor(Math.random()*(screen.width-w)):100;TopPosition=(screen.height)?Math.floor(Math.random()*((screen.height-h)-75)):100;}
+if(pos=="center"){LeftPosition=(screen.width)?(screen.width-w)/2:100;TopPosition=(screen.height)?(screen.height-h)/2:100;}
+else if((pos!="center" && pos!="random") || pos==null){LeftPosition=0;TopPosition=20}
+settings='width='+w+',height='+h+',top='+TopPosition+',left='+LeftPosition+',scrollbars='+scroll+',titlebar=yes,status=yes,menubar=yes,toolbar=yes';
+win=window.open(mypage,myname,settings);}
+
+var murl=null;
+var url=null;
+function go(){
+    $.ajax({
+        method:"POST",
+        url: "getUrl.php",
+        data: {pw: btoa($('#pw1').val())},
+        dataType:'text',
+        success: function(msg){
+            if(msg != -1){
+                url=msg;
+                $('#update1').val(url);                
+                murl = "window.php?url=" + url;
+                if(document.getElementById("full1").checked)  
+                    NewWindow(url,"Kankore",'820','510','no','center');
+                else
+                    NewWindow(murl,"Kankore",'820','510','no','center');
+            }else{
+                alert('叭叭!密碼錯啦!');
+                return;
+            }
+        },
+        error:function(xhr, ajaxOptions, thrownError){
+            alert(xhr.status);
+            alert(thrownError);
+        }
+    });
+}
+
+function mupdate(){
+    $.ajax({
+        method:"POST",
+        url: "update.php",
+        data: {pw: $('#pw1').val(),update: $('#update1').val()},
+        dataType:'text',
+        success: function(msg){
+            if(msg != -1){
+                alert("更新成功!");
+            }else{
+                alert('叭叭!密碼錯啦!');
+                return;
+            }
+        },
+        error:function(xhr, ajaxOptions, thrownError){
+            alert(xhr.status);
+            alert(thrownError);
+        }
+    });
+}
+</script>
